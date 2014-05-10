@@ -77,13 +77,15 @@ function augmentReqProto(reqProto, options) {
           r = new request.Request('GET', p(method));
         }
 
-        else r = new Request(method, p(url));
+        else r = new request.Request(method, p(url));
 
         return augment(r);
       }
       methods.forEach(function (method) {
-        uest[method] = function () {
-          return augment(request[method].apply(null, arguments));
+        uest[{'delete':'del'}[method]||method] = function (url, fn) {
+          var r = uest(method.toUpperCase(), url);
+          fn && r.end(fn);
+          return r;
         };
       });
       uest.forwardCookie = forwardCookie.bind(null, this.res);

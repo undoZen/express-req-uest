@@ -1,6 +1,6 @@
 {
   "name": "express-req-uest",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "req.uest to request backend http server related to per request",
   "main": "index.js",
   "scripts": {

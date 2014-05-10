@@ -84,6 +84,22 @@ describe('express-req-uest', function () {
       .expect(204, done);
   });
 
+  it('prefix sould work fine with methods', function (done) {
+    app = express();
+    reqUest(app, {prefix: prefix});
+    app.use('/test', function (req, res) {
+      req.uest.post('/post').send({hello: 'world'}).end(function (err, r) {
+        assert(!err);
+        assert.equal(r.text, 'world');
+        res.statusCode = 204;
+        res.end();
+      });
+    });
+    supertest(app)
+      .get('/test')
+      .expect(204, done);
+  });
+
   it('sould have q() method', function (done) {
     app.use('/test', function (req, res) {
       req.uest(prefix + '/ok').q(function (r) {
@@ -209,7 +225,6 @@ describe('express-req-uest', function () {
       .expect(204)
       .end(function (err, r) {
         var cookies = r.headers['set-cookie'];
-        console.log(cookies);
         assert(cookies[0].indexOf('Path=/helloworld') > -1);
         assert(cookies[1].indexOf('Path=/abc456') > -1);
         done();
