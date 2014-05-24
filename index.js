@@ -1,7 +1,6 @@
 'use strict';
 
 var http = require('http');
-var express =require('express');
 
 var request = require('superagent');
 require('q-superagent')(request);
