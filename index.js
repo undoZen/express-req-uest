@@ -2,6 +2,7 @@
 
 var http = require('http');
 
+var debug = require('debug')('req-uest');
 var request = require('superagent');
 require('q-superagent')(request);
 var methods = require('superagent/node_modules/methods');
@@ -55,12 +56,22 @@ function augmentReqProto(reqProto, options) {
         if (url[0] == '/') {
           return prefix + url;
         }
+        debug('url: %s', url);
         return url;
       };
       function augment(r) {
         r.agent(agent);
-        if (that.header) r.set('Cookie', that.header('cookie'));
-        if (that.ips) r.set('X-Forwarded-For', [that.ip].concat(that.ips).join(','));
+        var headers;
+        debug('headers: %j', headers);
+        if (that.header && (headers = that.header('cookie'))) r.set('Cookie', headers);
+
+        var ips = [];
+        if (that.ip && that.ip != '127.0.0.1') ips.push(that.ip);
+        if (that.ips && Array.isArray(that.ips)) {
+          ips.concat(that.ips[0] == that.ip ? that.ips.slice(1) : that.ips);
+        }
+        debug('ips: %j', ips);
+        if (ips.length) r.set('X-Forwarded-For', ips.join(','));
         return r;
       }
       function uest(method, url) {

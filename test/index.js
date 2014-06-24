@@ -114,10 +114,26 @@ describe('express-req-uest', function () {
       .expect(204, done);
   });
 
-  it('sould have header x-forwarded-for', function (done) {
+  it('sould not have header x-forwarded-for if request from local', function (done) {
     app.use('/test', function (req, res) {
       req.uest(prefix + '/ips').q(function (r) {
-        assert(r.text.indexOf('127.0.0.1') > -1);
+        assert(r.text.indexOf('127.0.0.1') == -1);
+        res.statusCode = 204;
+        res.end();
+      })
+      .done();
+    });
+    supertest(app)
+      .get('/test')
+      .expect(204, done);
+  });
+
+  it('sould have header x-forwarded-for', function (done) {
+    app.use('/test', function (req, res) {
+      req.uest(prefix + '/ips')
+      .set('X-Forwarded-For', '123.123.123.123,135.135.135.135')
+      .q(function (r) {
+        assert(r.text.indexOf('123.123.123.123') > -1);
         res.statusCode = 204;
         res.end();
       })
