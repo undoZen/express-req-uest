@@ -61,9 +61,9 @@ function augmentReqProto(reqProto, options) {
       };
       function augment(r) {
         r.agent(agent);
-        var headers;
-        if (that.header && (headers = that.header('cookie'))) r.set('Cookie', headers);
-        debug('headers: %j', headers);
+        var cookies;
+        if (that.header && (cookies = that.header('cookie'))) r.set('Cookie', cookies);
+        debug('cookies: %j', cookies);
 
         var ips = [];
         if (that.ip && that.ip != '127.0.0.1') ips.push(that.ip);
@@ -71,6 +71,7 @@ function augmentReqProto(reqProto, options) {
           ips.concat(that.ips[0] == that.ip ? that.ips.slice(1) : that.ips);
         }
         debug('ips: %j', ips);
+        debug('headers: %j', that.headers);
         if (ips.length) r.set('X-Forwarded-For', ips.join(','));
         return r;
       }
