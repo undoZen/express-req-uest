@@ -62,8 +62,8 @@ function augmentReqProto(reqProto, options) {
       function augment(r) {
         r.agent(agent);
         var headers;
-        debug('headers: %j', headers);
         if (that.header && (headers = that.header('cookie'))) r.set('Cookie', headers);
+        debug('headers: %j', headers);
 
         var ips = [];
         if (that.ip && that.ip != '127.0.0.1') ips.push(that.ip);
