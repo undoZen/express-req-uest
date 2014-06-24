@@ -48,31 +48,63 @@ function augmentReqProto(reqProto, options) {
     prefix = options.prefix;
     delete options.prefix;
   }
+  options.augments = null != options.augments && ~['object', 'function'].indexOf(typeof options.augments)
+                   ? options.augments
+                   : {};
+  var augments = [];
+  if (Array.isArray(options.augments)) {
+    augments = options.augments
+  } else if ('function' == typeof options.augments) {
+    augments = [options.augments];
+  } else if ('object' == typeof options.augments) {
+    if (options.augments.agent !== false) {
+      augments.push(function(r, req) {
+        r.agent(new http.Agent({maxSockets: 2}));
+      });
+    }
+    if (options.augments.cookies !== false) {
+      augments.push(function(r, req) {
+        var cookies;
+        if (req.header && (cookies = req.header('cookie'))) {
+          r.set('Cookie', cookies);
+        }
+        debug('cookies: %j', cookies);
+        return r;
+      });
+    }
+    if (options.augments.ips !== false) {
+      augments.push(function(r, req) {
+        var ips = [];
+        if (req.ip && req.ip != '127.0.0.1') ips.push(req.ip);
+        if (req.ips && Array.isArray(req.ips)) {
+          ips = ips.concat(req.ips[0] == req.ip ? req.ips.slice(1) : req.ips);
+        }
+        debug('ips: %j', ips);
+        if (ips.length) r.set('X-Forwarded-For', ips.join(', '));
+        return r;
+      });
+    }
+    if ('function' == typeof options.augments.custom) {
+      augments.push(options.augments.custom);
+    }
+    delete options.augments;
+  }
   Object.defineProperty(reqProto, 'uest', {
     get: function () {
       var that = this;
-      var agent = new http.Agent({maxSockets: 2});
-      var p = !prefix ? function (url) { return url; } : function (url) {
+      var p = !prefix ? function (url) {
+        debug('request url: %s', url);
+        return url;
+      } : function (url) {
+        debug('augment url: %s', url);
         if (url[0] == '/') {
           return prefix + url;
         }
-        debug('url: %s', url);
+        debug('request url: %s', url);
         return url;
       };
       function augment(r) {
-        r.agent(agent);
-        var cookies;
-        if (that.header && (cookies = that.header('cookie'))) r.set('Cookie', cookies);
-        debug('cookies: %j', cookies);
 
-        var ips = [];
-        if (that.ip && that.ip != '127.0.0.1') ips.push(that.ip);
-        if (that.ips && Array.isArray(that.ips)) {
-          ips.concat(that.ips[0] == that.ip ? that.ips.slice(1) : that.ips);
-        }
-        debug('ips: %j', ips);
-        debug('headers: %j', that.headers);
-        if (ips.length) r.set('X-Forwarded-For', ips.join(','));
         return r;
       }
       function uest(method, url) {
@@ -90,7 +122,9 @@ function augmentReqProto(reqProto, options) {
 
         else r = new request.Request(method, p(url));
 
-        return augment(r);
+        augments.forEach(function (f) { f(r, that); });
+        debug('headers: %j', r.request()._renderHeaders());
+        return r;
       }
       methods.forEach(function (method) {
         uest[{'delete':'del'}[method]||method] = function (url, fn) {

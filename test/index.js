@@ -38,6 +38,7 @@ describe('express-req-uest', function () {
     prefix = 'http://' + addr.address + ':' + addr.port;
 
     app = express();
+    app.enable('trust proxy');
     reqUest(app);
   });
 
@@ -128,10 +129,46 @@ describe('express-req-uest', function () {
       .expect(204, done);
   });
 
+  it('support disable augments', function (done) {
+    app = express();
+    reqUest(app, {augments: {ips: false}});
+    app.use('/test', function (req, res) {
+      req.uest(prefix + '/ips')
+      .q(function (r) {
+        assert(r.text.indexOf('123.123.123.123') == -1);
+        res.statusCode = 204;
+        res.end();
+      })
+      .done();
+    });
+    supertest(app)
+      .get('/test')
+      .set('X-Forwarded-For', '123.123.123.123,135.135.135.135')
+      .expect(204, done);
+  });
+
+  it('support custom augments', function (done) {
+    app = express();
+    reqUest(app, {augments: {ips: false, custom: function (r, req) { r.set('X-Forwarded-For', '234.234.234.234'); }}});
+    app.use('/test', function (req, res) {
+      req.uest(prefix + '/ips')
+      .q(function (r) {
+        assert(r.text.indexOf('234.234.234.234') > -1);
+        res.statusCode = 204;
+        res.end();
+      })
+      .done();
+    });
+    supertest(app)
+      .get('/test')
+      .set('X-Forwarded-For', '123.123.123.123,135.135.135.135')
+      .expect(204, done);
+  });
+
+
   it('sould have header x-forwarded-for', function (done) {
     app.use('/test', function (req, res) {
       req.uest(prefix + '/ips')
-      .set('X-Forwarded-For', '123.123.123.123,135.135.135.135')
       .q(function (r) {
         assert(r.text.indexOf('123.123.123.123') > -1);
         res.statusCode = 204;
@@ -141,6 +178,7 @@ describe('express-req-uest', function () {
     });
     supertest(app)
       .get('/test')
+      .set('X-Forwarded-For', '123.123.123.123,135.135.135.135')
       .expect(204, done);
   });
 
