@@ -101,14 +101,13 @@ describe('express-req-uest', function () {
       .expect(204, done);
   });
 
-  it('sould have q() method', function (done) {
+  it('end() sould return a promise', function (done) {
     app.use('/test', function (req, res) {
-      req.uest(prefix + '/ok').q(function (r) {
+      req.uest(prefix + '/ok').end().then(function (r) {
         assert.equal(r.text, 'OK');
         res.statusCode = 204;
         res.end();
-      })
-      .done();
+      });
     });
     supertest(app)
       .get('/test')
@@ -117,12 +116,11 @@ describe('express-req-uest', function () {
 
   it('sould not have header x-forwarded-for if request from local', function (done) {
     app.use('/test', function (req, res) {
-      req.uest(prefix + '/ips').q(function (r) {
+      req.uest(prefix + '/ips').end().then(function (r) {
         assert(r.text.indexOf('127.0.0.1') == -1);
         res.statusCode = 204;
         res.end();
-      })
-      .done();
+      });
     });
     supertest(app)
       .get('/test')
@@ -134,12 +132,11 @@ describe('express-req-uest', function () {
     reqUest(app, {augments: {ips: false}});
     app.use('/test', function (req, res) {
       req.uest(prefix + '/ips')
-      .q(function (r) {
+      .end().then(function (r) {
         assert(r.text.indexOf('123.123.123.123') == -1);
         res.statusCode = 204;
         res.end();
-      })
-      .done();
+      });
     });
     supertest(app)
       .get('/test')
@@ -152,12 +149,11 @@ describe('express-req-uest', function () {
     reqUest(app, {augments: {ips: false, custom: function (r, req) { r.set('X-Forwarded-For', '234.234.234.234'); }}});
     app.use('/test', function (req, res) {
       req.uest(prefix + '/ips')
-      .q(function (r) {
+      .end().then(function (r) {
         assert(r.text.indexOf('234.234.234.234') > -1);
         res.statusCode = 204;
         res.end();
-      })
-      .done();
+      });
     });
     supertest(app)
       .get('/test')
@@ -169,12 +165,11 @@ describe('express-req-uest', function () {
   it('sould have header x-forwarded-for', function (done) {
     app.use('/test', function (req, res) {
       req.uest(prefix + '/ips')
-      .q(function (r) {
+      .end().then(function (r) {
         assert(r.text.indexOf('123.123.123.123') > -1);
         res.statusCode = 204;
         res.end();
-      })
-      .done();
+      });
     });
     supertest(app)
       .get('/test')
@@ -184,12 +179,11 @@ describe('express-req-uest', function () {
 
   it('sould proxy cookie', function (done) {
     app.use('/test', function (req, res) {
-      req.uest(prefix + '/cookie').q(function (r) {
+      req.uest(prefix + '/cookie').end().then(function (r) {
         assert.equal(r.text, 'hello=world');
         res.statusCode = 204;
         res.end();
-      })
-      .done();
+      });
     });
     supertest(app)
       .get('/test')
@@ -201,12 +195,11 @@ describe('express-req-uest', function () {
     app = express();
     reqUest(app, {prefix: prefix});
     app.use('/test', function (req, res) {
-      req.uest('/ok').q(function (r) {
+      req.uest('/ok').end().then(function (r) {
         assert.equal(r.text, 'OK');
         res.statusCode = 204;
         res.end();
-      })
-      .done();
+      });
     });
     supertest(app)
       .get('/test')
@@ -216,14 +209,13 @@ describe('express-req-uest', function () {
 
   it('forward cookie (alter path to / by default)', function (done) {
     app.use('/test', function (req, res) {
-      req.uest(prefix + '/set-cookie').q(function (r) {
+      req.uest(prefix + '/set-cookie').end().then(function (r) {
         assert.equal(r.text, 'OK');
         res.cookie('a', 'b');
         req.uest.forwardCookie(r);
         res.statusCode = 204;
         res.end();
-      })
-      .done();
+      });
     });
     supertest(app)
       .get('/test')
@@ -242,13 +234,12 @@ describe('express-req-uest', function () {
 
   it('forward cookie (turn off path alter)', function (done) {
     app.use('/test', function (req, res) {
-      req.uest(prefix + '/set-cookie').q(function (r) {
+      req.uest(prefix + '/set-cookie').end().then(function (r) {
         assert.equal(r.text, 'OK');
         req.uest.forwardCookie(r, false);
         res.statusCode = 204;
         res.end();
-      })
-      .done();
+      });
     });
     supertest(app)
       .get('/test')
@@ -263,7 +254,7 @@ describe('express-req-uest', function () {
 
   it('forward cookie (use function alterPath)', function (done) {
     app.use('/test', function (req, res) {
-      req.uest(prefix + '/set-cookie').q(function (r) {
+      req.uest(prefix + '/set-cookie').end().then(function (r) {
         assert.equal(r.text, 'OK');
         req.uest.forwardCookie(r, function (url) {
           if (url == '/abc123') return '/abc456';
@@ -271,8 +262,7 @@ describe('express-req-uest', function () {
         });
         res.statusCode = 204;
         res.end();
-      })
-      .done();
+      });
     });
     supertest(app)
       .get('/test')

@@ -3,11 +3,10 @@
 var http = require('http');
 
 var debug = require('debug')('req-uest');
-var request = require('superagent');
-require('q-superagent')(request);
+var request = require('cc-superagent-promise');
 var methods = require('superagent/node_modules/methods');
 
-var _ = require('lodash');
+var _ = require('lodash-node');
 var binary = require('fn-binary');
 
 exports = module.exports = reqUest;
@@ -112,15 +111,15 @@ function augmentReqProto(reqProto, options) {
 
         // callback
         if ('function' == typeof url) {
-          r = new request.Request('GET', p(method)).end(url);
+          r = new request('GET', p(method)).end(url);
         }
 
         // url first
         else if (1 == arguments.length) {
-          r = new request.Request('GET', p(method));
+          r = new request('GET', p(method));
         }
 
-        else r = new request.Request(method, p(url));
+        else r = new request(method, p(url));
 
         augments.forEach(function (f) { f(r, that); });
         debug('headers: %j', r.request()._renderHeaders());
