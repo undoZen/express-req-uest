@@ -22,7 +22,6 @@
   "homepage": "https://github.com/undoZen/express-req-uest",
   "devDependencies": {
     "body-parser": "^1.0.2",
-    "debug": "^0.8.1",
     "express": "^4.1.1",
     "mocha": "^1.18.2",
     "supertest": "^0.12.0"
@@ -30,8 +29,8 @@
   "dependencies": {
     "bluebird": "^2.4.2",
     "cc-superagent-promise": "^0.2.0-a",
+    "debug": "^2.1.0",
     "fn-binary": "^1.0.0",
-    "lodash-node": "^2.4.1",
     "native-or-bluebird": "^1.1.2",
     "superagent": "^0.21.0"
   }
