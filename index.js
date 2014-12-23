@@ -94,17 +94,21 @@ function augmentReqProto(reqProto, options) {
   Object.defineProperty(reqProto, 'uest', {
     get: function () {
       var that = this;
-      var p = !prefix ? function (url) {
-        debug('request url: %s', url);
-        return url;
-      } : function (url) {
-        debug('augment url: %s', url);
-        if (url[0] == '/') {
-          return prefix + url;
-        }
+      var p = function (url) {
         debug('request url: %s', url);
         return url;
       };
+      if (typeof prefix === 'string') {
+        prefix = prefix.replace(/\/+$/, '');
+        p = function (url) {
+          debug('augment url: %s', url);
+          if (url[0] == '/') {
+            url = prefix + url;
+          }
+          debug('request url: %s', url);
+          return url;
+        };
+      }
       function augment(r) {
         return r;
       }

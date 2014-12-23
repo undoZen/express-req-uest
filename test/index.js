@@ -85,6 +85,22 @@ describe('express-req-uest', function () {
       .expect(204, done);
   });
 
+  it('prefix sould work fine when it\'s ending with slash', function (done) {
+    app = express();
+    reqUest(app, {prefix: prefix + '/'});
+    app.use('/test', function (req, res) {
+      req.uest.post('/post').send({hello: 'world'}).end(function (err, r) {
+        assert(!err);
+        assert.equal(r.text, 'world');
+        res.statusCode = 204;
+        res.end();
+      });
+    });
+    supertest(app)
+      .get('/test')
+      .expect(204, done);
+  });
+
   it('prefix sould work fine with methods', function (done) {
     app = express();
     reqUest(app, {prefix: prefix});
