@@ -275,4 +275,18 @@ describe('express-req-uest', function () {
       });
   });
 
+  it('support https', function (done) {
+    this.timeout(5000);
+    app.use('/test', function (req, res) {
+      req.uest('https://example.com/').end().then(function (r) {
+        assert(r.text.indexOf('Example') > -1);
+        res.statusCode = 204;
+        res.end();
+      });
+    });
+    supertest(app)
+      .get('/test')
+      .expect(204, done);
+  });
+
 });

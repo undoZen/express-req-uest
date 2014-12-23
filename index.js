@@ -1,6 +1,8 @@
 'use strict';
 
 var http = require('http');
+var https = require('https');
+var parseUrl = require('url').parse.bind(require('url'));
 
 var debug = require('debug')('req-uest');
 var request = require('cc-superagent-promise');
@@ -58,7 +60,8 @@ function augmentReqProto(reqProto, options) {
   } else if ('object' == typeof options.augments) {
     if (options.augments.agent !== false) {
       augments.push(function(r, req) {
-        r.agent(new http.Agent({maxSockets: 2}));
+        debug('using sharedAgents, protocol: ', parseUrl(r.url).protocol);
+        r.agent(r.sharedAgents[parseUrl(r.url).protocol || 'http:']);
       });
     }
     if (options.augments.cookies !== false) {
@@ -103,7 +106,6 @@ function augmentReqProto(reqProto, options) {
         return url;
       };
       function augment(r) {
-
         return r;
       }
       function uest(method, url) {
@@ -121,6 +123,8 @@ function augmentReqProto(reqProto, options) {
 
         else r = new request(method, p(url));
 
+        r.sharedAgents = sharedAgents;
+
         augments.forEach(function (f) { f(r, that); });
         debug('headers: %j', r.request()._renderHeaders());
         return r;
@@ -133,6 +137,10 @@ function augmentReqProto(reqProto, options) {
         };
       });
       uest.forwardCookie = forwardCookie.bind(null, this.res);
+      var sharedAgents = uest.sharedAgents = {
+        'http:': new http.Agent({maxSockets: 2}),
+        'https:': new https.Agent({maxSockets: 2})
+      };
       Object.defineProperty(this, 'uest', {value: uest});
       return uest;
     }
