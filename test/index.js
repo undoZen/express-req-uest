@@ -35,7 +35,7 @@ describe('express-req-uest', function () {
       res.end('OK');
     });
     addr = backend.listen(null, done).address();
-    prefix = 'http://' + addr.address + ':' + addr.port;
+    prefix = 'http://127.0.0.1:' + addr.port;
 
     app = express();
     app.enable('trust proxy');

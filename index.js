@@ -3,13 +3,10 @@
 var http = require('http');
 var https = require('https');
 var parseUrl = require('url').parse.bind(require('url'));
+var methods = require('methods');
 
 var debug = require('debug')('req-uest');
-var request = require('cc-superagent-promise');
-var methods = require('superagent/node_modules/methods');
-
-var _ = require('lodash-node');
-var binary = require('fn-binary');
+var request = require('promisingagent');
 
 exports = module.exports = reqUest;
 
@@ -77,7 +74,7 @@ function augmentReqProto(reqProto, options) {
     if (options.augments.ips !== false) {
       augments.push(function(r, req) {
         var ips = [];
-        if (req.ip && req.ip != '127.0.0.1') ips.push(req.ip);
+        if (req.ip && req.ip.indexOf('127.0.0.1') === -1) ips.push(req.ip);
         if (req.ips && Array.isArray(req.ips)) {
           ips = ips.concat(req.ips[0] == req.ip ? req.ips.slice(1) : req.ips);
         }
