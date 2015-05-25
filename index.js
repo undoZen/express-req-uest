@@ -6,7 +6,7 @@ var parseUrl = require('url').parse.bind(require('url'));
 var methods = require('methods');
 
 var debug = require('debug')('req-uest');
-var request = require('promisingagent');
+var request = global.proagent || global.promisingagent || require('promisingagent');
 
 exports = module.exports = reqUest;
 
