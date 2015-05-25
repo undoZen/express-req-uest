@@ -131,11 +131,7 @@ function augmentReqProto(reqProto, options) {
         return r;
       }
       methods.forEach(function (method) {
-        uest[{'delete':'del'}[method]||method] = function (url, fn) {
-          var r = uest(method.toUpperCase(), url);
-          fn && r.end(fn);
-          return r;
-        };
+        uest[{'delete':'del'}[method]||method] = uest.bind(uest, method.toUpperCase());
       });
       uest.forwardCookie = forwardCookie.bind(null, this.res);
       var sharedAgents = uest.sharedAgents = {
