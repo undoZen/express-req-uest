@@ -20,6 +20,10 @@ describe('express-req-uest', function () {
     backend.get('/ok', function (req, res) {
       res.end('OK');
     });
+    backend.get('/404', function (req, res) {
+      res.statusCode = 404
+      res.end('not found');
+    });
     backend.get('/ips', function (req, res) {
       res.end(req.headers['x-forwarded-for']);
     });
@@ -62,6 +66,21 @@ describe('express-req-uest', function () {
       req.uest(prefix + '/ok').end(function (err, r) {
         assert(!err);
         assert.equal(r.text, 'OK');
+        res.statusCode = 204;
+        res.end();
+      });
+    });
+    supertest(app)
+      .get('/test')
+      .expect(204, done);
+  });
+
+  it('no err for non-2xx response', function (done) {
+    app.use('/test', function (req, res) {
+      req.uest(prefix + '/404').end(function (err, r) {
+        assert(!err);
+        assert.equal(r.status, 404);
+        assert.equal(r.text, 'not found');
         res.statusCode = 204;
         res.end();
       });
