@@ -110,20 +110,16 @@ function augmentReqProto(reqProto, options) {
         return r;
       }
       function uest(method, url) {
+        var args = Array.prototype.slice.call(arguments);
         var r;
 
-        // callback
-        if ('function' == typeof url) {
-          r = new request('GET', p(method)).end(url);
+        if (typeof url === 'string') {
+            args[1] = p(url);
+        } else {
+            args[0] = p(method);
         }
 
-        // url first
-        else if (1 == arguments.length) {
-          r = new request('GET', p(method));
-        }
-
-        else r = new request(method, p(url));
-
+        r = request.apply(null, args);
         r.sharedAgents = sharedAgents;
 
         augments.forEach(function (f) { f(r, that); });
