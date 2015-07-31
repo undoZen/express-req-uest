@@ -6,7 +6,12 @@ var parseUrl = require('url').parse.bind(require('url'));
 
 var debug = require('debug')('req-uest');
 var request = require('cc-superagent-promise');
-var methods = require('superagent/node_modules/methods');
+var methods;
+try {
+    methods = require('superagent/node_modules/methods');
+} catch (e) {
+    methods = require('methods');
+}
 
 var _ = require('lodash-node');
 var binary = require('fn-binary');
